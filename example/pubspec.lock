@@ -73,9 +73,11 @@ packages:
   flutter_aaos_car_property:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "4c6ead95715d5919c54b9f91d2415f8907812184"
+      url: "git@github.com:haradama/flutter_aaos_car_property.git"
+    source: git
     version: "0.0.1"
   flutter_driver:
     dependency: transitive

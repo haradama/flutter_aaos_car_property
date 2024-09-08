@@ -5,6 +5,7 @@ void main() {
   runApp(const MyApp());
 }
 
+// Root widget of the application
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Main page of the application
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -31,44 +33,45 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _isNightMode = false; // ナイトモードの状態を保存
-  int _cabinLightState = 0; // キャビンライトの状態を保存
-  bool _initialized = false; // 初期化状態
+  bool _isNightMode = false; // Tracks night mode status
+  int _cabinLightState = 0; // Tracks cabin light status
+  bool _initialized = false; // Tracks initialization status
   final FlutterAaosCarProperty _carProperty =
-      FlutterAaosCarProperty(); // CarPropertyインスタンス
+      FlutterAaosCarProperty(); // CarPropertyManager instance
 
   @override
   void initState() {
     super.initState();
-    _initializeCarManager(); // ウィジェットがロードされた時にCarPropertyManagerを初期化
+    _initializeCarManager(); // Initialize CarPropertyManager when the widget is loaded
   }
 
-  // CarPropertyManagerを初期化し、ナイトモードの初期状態を取得
+  // Initializes the CarPropertyManager and retrieves initial night mode status
   Future<void> _initializeCarManager() async {
     await _carProperty.initializeCarManager();
     setState(() {
-      _initialized = true; // 初期化完了後にUIを更新
+      _initialized = true; // Update UI after initialization
     });
-    _getNightModeStatus(); // 初期化後にナイトモード状態を取得
+    _getNightModeStatus(); // Retrieve night mode status after initialization
   }
 
-  // ナイトモード状態を車両から取得
+  // Retrieves the current night mode status from the car property
   Future<void> _getNightModeStatus() async {
     final bool? value =
         await _carProperty.getCarProperty(0x11200407, 0) as bool?;
     if (value != null) {
       setState(() {
-        debugPrint(value.toString()); // デバッグ用にナイトモードの状態を出力
-        _isNightMode = value; // UIに取得したナイトモードの値を反映
+        debugPrint(
+            value.toString()); // Output the night mode status for debugging
+        _isNightMode = value; // Update UI with the night mode status
       });
     }
   }
 
-  // ユーザーが選択したキャビンライト状態を設定
+  // Sets the cabin light state based on user selection
   Future<void> _setCabinLight(int state) async {
     await _carProperty.setCarProperty(0x11400f02, 0, state);
     setState(() {
-      _cabinLightState = state; // UIに新しいキャビンライトの状態を反映
+      _cabinLightState = state; // Update UI with the new cabin light state
     });
   }
 
@@ -76,8 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: _isNightMode
-          ? ThemeData.dark() // ナイトモードがONならダークテーマ
-          : ThemeData.light(), // ナイトモードがOFFならライトテーマ
+          ? ThemeData.dark() // Apply dark theme if night mode is enabled
+          : ThemeData.light(), // Apply light theme if night mode is disabled
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -92,18 +95,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     Text(
                       _isNightMode
                           ? "Night Mode ON"
-                          : "Night Mode OFF", // ナイトモードの状態を表示
+                          : "Night Mode OFF", // Display current night mode status
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _getNightModeStatus, // クリックでナイトモードの状態を更新
+                      onPressed:
+                          _getNightModeStatus, // Button to refresh night mode status
                       child: const Text('Get Night Mode Status'),
                     ),
                     const SizedBox(height: 20),
                     const Text('Cabin Lights:'),
                     DropdownButton<int>(
-                      value: _cabinLightState, // 現在のキャビンライトの状態
+                      value: _cabinLightState, // Current cabin light status
                       items: const [
                         DropdownMenuItem(
                           value: 0,
@@ -124,7 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                       onChanged: (int? newValue) {
                         if (newValue != null) {
-                          _setCabinLight(newValue); // 新しいキャビンライトの状態を設定
+                          _setCabinLight(
+                              newValue); // Set new cabin light status
                         }
                       },
                     ),
@@ -135,12 +140,12 @@ class _MyHomePageState extends State<MyHomePage> {
                               ? "Cabin Light ON"
                               : _cabinLightState == 2
                                   ? "Daytime Running"
-                                  : "Automatic", // 現在のキャビンライトの状態を表示
+                                  : "Automatic", // Display current cabin light status
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ],
                 )
-              : const CircularProgressIndicator(), // 初期化中はロードインジケータを表示
+              : const CircularProgressIndicator(), // Show loading indicator during initialization
         ),
       ),
     );
